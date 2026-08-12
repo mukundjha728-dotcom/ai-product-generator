@@ -31,31 +31,34 @@ React UI
 API Service (fetch /api/generate)
    ↓
 Vercel Serverless Function (Backend)
+   ├──────────────────────────┐
+   ↓                          ↓
+Google Gemini API         DuckDuckGo JSON API
+(Text Generation)         (Image Search)
+   ↓                          ↓
+   ├──────────────────────────┘
    ↓
-REST API (Google Gemini)
-   ↓
-Structured JSON
+Structured JSON + Image URL
    ↓
 React State
    ↓
 Product Card
 ```
 
-## AI Integration
+## AI & Dynamic Search Integration
 
-The application securely integrates with the Google Gemini REST API (`gemini-3.5-flash` model) using a backend serverless function to protect API keys.
-- **Where:** The frontend makes a request in `src/services/aiService.js` to the backend endpoint `/api/generate`.
-- **Backend:** The Vercel Serverless Function at `api/generate.js` safely stores the API key and makes the actual request to Gemini.
-- **Data Sent:** The user's `productName` and `category` are dynamically injected into a highly structured prompt.
-- **Expected Response:** The prompt strictly instructs the AI to return ONLY a valid JSON object containing exactly 3 fields: `title` (string), `description` (string), and `keywords` (array of exactly 5 strings).
-- **Validation:** The frontend service parses the JSON response using `src/utils/responseParser.js`, strictly enforcing that exactly 5 keywords are present to ensure the application only renders valid data.
+The application uses a serverless backend (`/api/generate.js`) to orchestrate two parallel services:
+1. **AI Text Generation:** Securely queries the Google Gemini REST API (`gemini-3.5-flash`) with a strict prompt to return a validated JSON payload containing exactly a title, description, and 5 keywords.
+2. **Dynamic Image Search:** Concurrently searches the DuckDuckGo internal JSON API (`/i.js`) for the exact product. It scores the top 50 returned candidates based on a deterministic token-matching algorithm to ensure high product relevance while penalizing stock/clipart images.
+
+- **Resilience:** The frontend `ProductCard` includes a robust fallback loop. If the primary image fails to load (e.g. 403 Forbidden hotlink), it seamlessly attempts to load the next best candidate. A dedicated `Retry Image` handler is also provided.
 
 ## Design Decisions
 
 The user interface was intentionally designed as a clean, responsive, and professional utility rather than a flashy marketing page.
-- Visual elements like excessive gradients, glassmorphism, and "AI magic" fluff were avoided to keep the focus entirely on the functional requirements and the generated data.
-- The product card deliberately omits images, fake prices, or fake reviews, focusing solely on the content the AI was explicitly instructed to generate.
-- The API key was removed from the client-side bundle and moved to a secure backend route to meet production security standards.
+- Visual elements like excessive gradients and "AI magic" fluff were avoided to keep the focus entirely on the functional requirements and the generated data.
+- The product image is fetched dynamically using real web data, rather than relying on random stock photos or hallucinated AI image generations, proving the architecture is highly practical and scalable.
+- The API key and search logic were removed from the client-side bundle and moved to a secure backend route to meet production security standards.
 
 ## Setup & Installation
 

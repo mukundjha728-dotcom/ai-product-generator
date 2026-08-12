@@ -14,12 +14,7 @@ export const parseAIResponse = (responseText) => {
       throw new Error("Missing or invalid 'keywords' in response");
     }
     if (data.keywords.length !== 5) {
-      // Force exactly 5 keywords by padding or slicing
-      if (data.keywords.length > 5) {
-        data.keywords = data.keywords.slice(0, 5);
-      } else {
-        throw new Error("AI did not generate exactly 5 keywords as requested.");
-      }
+      throw new Error("AI did not generate exactly 5 keywords as requested.");
     }
 
     return data;

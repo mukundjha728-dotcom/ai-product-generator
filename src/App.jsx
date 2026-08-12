@@ -14,8 +14,10 @@ function App() {
     setCategory,
     generatedProduct,
     loading,
+    isRetryingImage,
     error,
-    handleGenerate
+    handleGenerate,
+    handleRetryImage
   } = useProductGenerator();
 
   return (
@@ -44,6 +46,9 @@ function App() {
             ) : generatedProduct ? (
               <ProductCard 
                 product={generatedProduct} 
+                onRegenerate={handleGenerate}
+                onRetryImage={handleRetryImage}
+                isRetryingImage={isRetryingImage}
               />
             ) : (
               <EmptyState />

@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function ProductCard({ product, onRegenerate }) {
+export default function ProductCard({ product, onRegenerate, onRetryImage, isRetryingImage }) {
   const [copied, setCopied] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [currentFallbackIndex, setCurrentFallbackIndex] = useState(-1);
+
+  // Reset image state when a new product comes in
+  useEffect(() => {
+    setImgError(false);
+    setCurrentFallbackIndex(-1);
+  }, [product]);
 
   if (!product) return null;
 
@@ -13,8 +21,54 @@ export default function ProductCard({ product, onRegenerate }) {
     });
   };
 
+  const handleImageError = () => {
+    if (product.image && product.image.fallbacks && currentFallbackIndex + 1 < product.image.fallbacks.length) {
+      setCurrentFallbackIndex(prev => prev + 1);
+    } else {
+      setImgError(true);
+    }
+  };
+
+  // Determine current image URL
+  const hasValidImageBase = product.image && !product.imageError;
+  const currentImageUrl = hasValidImageBase 
+    ? (currentFallbackIndex === -1 ? product.image.url : product.image.fallbacks[currentFallbackIndex]) 
+    : null;
+
+  const shouldShowImage = currentImageUrl && !imgError;
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full w-full">
+      
+      {/* Image Section */}
+      <div className="w-full h-64 bg-gray-50 border-b border-gray-200 relative overflow-hidden flex items-center justify-center">
+        {shouldShowImage ? (
+          <img 
+            src={currentImageUrl} 
+            alt={product.title}
+            onError={handleImageError}
+            loading="lazy"
+            className="w-full h-full object-contain p-4 mix-blend-multiply"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-gray-400 p-6 text-center">
+            <svg className="w-12 h-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <span className="text-sm font-medium mb-3">Relevant product image unavailable.</span>
+            {onRetryImage && (
+              <button 
+                onClick={onRetryImage}
+                disabled={isRetryingImage}
+                className="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                {isRetryingImage ? 'Retrying...' : 'Retry Image'}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="p-6 md:p-8 flex-1 flex flex-col">
         <div className="mb-4">
           <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold tracking-wider uppercase rounded-md border border-gray-200">

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { generateProductContent } from "../services/aiService";
+import { generateProductContent, retryProductImage } from "../services/aiService";
 
 export const useProductGenerator = () => {
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [generatedProduct, setGeneratedProduct] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isRetryingImage, setIsRetryingImage] = useState(false);
   const [error, setError] = useState("");
 
   const handleGenerate = async (e) => {
@@ -34,6 +35,21 @@ export const useProductGenerator = () => {
     }
   };
 
+  const handleRetryImage = async () => {
+    if (!generatedProduct) return;
+    setIsRetryingImage(true);
+    try {
+      const { image, imageError } = await retryProductImage(productName, category);
+      setGeneratedProduct(prev => ({
+        ...prev,
+        image,
+        imageError
+      }));
+    } finally {
+      setIsRetryingImage(false);
+    }
+  };
+
   const handleReset = () => {
     setGeneratedProduct(null);
     setError("");
@@ -46,9 +62,11 @@ export const useProductGenerator = () => {
     setCategory,
     generatedProduct,
     loading,
+    isRetryingImage,
     error,
     setError,
     handleGenerate,
+    handleRetryImage,
     handleReset
   };
 };
