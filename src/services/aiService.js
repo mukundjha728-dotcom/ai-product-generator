@@ -8,25 +8,28 @@ export const generateProductContent = async (productName, category) => {
     throw new Error("API key is missing. Please check your .env file.");
   }
 
-  const prompt = `You are an expert e-commerce content writer.
+  const prompt = `You are a professional ecommerce product copywriter.
 
-Generate product content for:
+Generate concise product content using only the supplied product name and category.
 Product Name: ${productName}
 Category: ${category}
 
-Return ONLY valid JSON with no markdown formatting. The JSON must exactly match this structure:
+Return ONLY valid JSON in this exact structure:
+
 {
-  "title": "A concise, marketable product title.",
-  "description": "A short, compelling e-commerce-friendly description.",
-  "keywords": ["keyword1", "keyword2", "keyword3"]
+  "title": "string",
+  "description": "string",
+  "keywords": ["string", "string", "string", "string", "string"]
 }
 
 Rules:
-- Title should be concise and professional.
-- Description should be short and compelling (2-3 sentences max).
-- Generate 4-6 relevant keywords.
-- Do not invent technical specifications not implied by the name.
-- Do not include any markdown, backticks, or extra text. ONLY return the JSON object.`;
+- Create a concise and commercially appropriate title.
+- Description must contain 1–2 sentences.
+- Return exactly 5 relevant keywords.
+- Do not invent specific technical specifications.
+- Do not invent prices, ratings, reviews or product features that were not provided.
+- Do not include markdown.
+- Do not include explanations outside the JSON.`;
 
   try {
     // This example uses the Gemini API structure.

@@ -19,19 +19,13 @@ function App() {
   } = useProductGenerator();
 
   return (
-    <div className="min-h-screen bg-slate-950 font-sans selection:bg-fuchsia-500/30 selection:text-fuchsia-200 relative overflow-hidden flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      
-      {/* Background Animated Orbs */}
-      <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob"></div>
-      <div className="absolute top-0 -right-4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-fuchsia-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-4000 transform -translate-x-1/2"></div>
-      
-      <div className="max-w-6xl w-full mx-auto relative z-10">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-5xl w-full mx-auto">
         <Header />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-12">
           {/* Left Column: Form */}
-          <div className="lg:col-span-5 relative z-10 w-full">
+          <div className="lg:col-span-5 w-full">
             <ErrorMessage message={error} />
             <ProductForm
               productName={productName}
@@ -44,13 +38,12 @@ function App() {
           </div>
 
           {/* Right Column: Preview Area */}
-          <div className="lg:col-span-7 h-full min-h-[500px] w-full">
+          <div className="lg:col-span-7 h-full min-h-[400px] w-full">
             {loading ? (
               <LoadingState />
             ) : generatedProduct ? (
               <ProductCard 
                 product={generatedProduct} 
-                onRegenerate={handleGenerate} 
               />
             ) : (
               <EmptyState />
