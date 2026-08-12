@@ -1,5 +1,7 @@
 # AI Product Content Generator
 
+🚀 **Live Demo:** [https://ai-product-generator-delta.vercel.app/](https://ai-product-generator-delta.vercel.app/)
+
 A modern, AI-powered web application that generates professional product content (titles, descriptions, and relevant keywords) based on a product name and category. 
 
 ## Features
