@@ -89,6 +89,50 @@ function scoreCandidate(candidate, productName, category) {
 }
 
 /**
+ * Fetches and ranks image candidates using Bing Image Search (Vercel-safe fallback)
+ */
+async function searchBingImages(query, productName, category) {
+  const url = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2`;
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error(`Bing API error: ${res.status}`);
+  }
+
+  const text = await res.text();
+  // Extract direct image URLs from Bing's internal HTML data attributes
+  const murls = [...text.matchAll(/murl&quot;:&quot;(http[^&]+)&quot;/g)].map(m => m[1]);
+
+  if (murls.length === 0) return null;
+
+  // We use the image URL itself as the "title" for scoring since it often contains product keywords
+  const candidates = murls.map(url => ({
+    url,
+    title: decodeURIComponent(url).replace(/[-_/+]/g, ' '),
+    source: '',
+    width: 500, 
+    height: 500
+  }));
+
+  candidates.forEach(c => {
+    c.score = scoreCandidate(c, productName, category);
+  });
+
+  candidates.sort((a, b) => b.score - a.score);
+  const topCandidates = candidates.slice(0, 5);
+
+  return {
+    url: topCandidates[0].url,
+    alt: productName,
+    fallbacks: topCandidates.slice(1).map(c => c.url)
+  };
+}
+
+/**
  * Fetches and ranks image candidates using DuckDuckGo
  */
 export async function searchProductImage(productName, category) {
@@ -145,7 +189,12 @@ export async function searchProductImage(productName, category) {
       fallbacks: topCandidates.slice(1).map(c => c.url)
     };
   } catch (error) {
-    console.error("Image Search Error:", error);
-    return null;
+    console.warn("DuckDuckGo Image Search Error (likely Vercel block). Falling back to Bing...", error.message);
+    try {
+      return await searchBingImages(query, productName, category);
+    } catch (bingError) {
+      console.error("Bing Image Search Error:", bingError);
+      return null;
+    }
   }
 }
