@@ -27,7 +27,8 @@ export const useProductGenerator = () => {
       const result = await generateProductContent(productName, category);
       setGeneratedProduct({ ...result, category }); // Include category for display
     } catch (err) {
-      setError(err.message || "An unexpected error occurred.");
+      console.error(err);
+      setError("Unable to generate content right now. Please try again.");
     } finally {
       setLoading(false);
     }
