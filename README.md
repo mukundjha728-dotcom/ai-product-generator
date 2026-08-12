@@ -28,11 +28,11 @@ A professional frontend web application that generates concise, market-ready pro
 ```
 React UI
    ↓
-AI Service
+API Service (fetch /api/generate)
+   ↓
+Vercel Serverless Function (Backend)
    ↓
 REST API (Google Gemini)
-   ↓
-AI Model
    ↓
 Structured JSON
    ↓
@@ -43,17 +43,19 @@ Product Card
 
 ## AI Integration
 
-The application integrates with the Google Gemini REST API (`gemini-3.5-flash` model). 
-- **Where:** The request is made in `src/services/aiService.js`.
+The application securely integrates with the Google Gemini REST API (`gemini-3.5-flash` model) using a backend serverless function to protect API keys.
+- **Where:** The frontend makes a request in `src/services/aiService.js` to the backend endpoint `/api/generate`.
+- **Backend:** The Vercel Serverless Function at `api/generate.js` safely stores the API key and makes the actual request to Gemini.
 - **Data Sent:** The user's `productName` and `category` are dynamically injected into a highly structured prompt.
 - **Expected Response:** The prompt strictly instructs the AI to return ONLY a valid JSON object containing exactly 3 fields: `title` (string), `description` (string), and `keywords` (array of exactly 5 strings).
-- **Validation:** The frontend service securely parses the JSON response using `src/utils/responseParser.js` to ensure the application only renders valid, structured data.
+- **Validation:** The frontend service parses the JSON response using `src/utils/responseParser.js`, strictly enforcing that exactly 5 keywords are present to ensure the application only renders valid data.
 
 ## Design Decisions
 
 The user interface was intentionally designed as a clean, responsive, and professional utility rather than a flashy marketing page.
 - Visual elements like excessive gradients, glassmorphism, and "AI magic" fluff were avoided to keep the focus entirely on the functional requirements and the generated data.
 - The product card deliberately omits images, fake prices, or fake reviews, focusing solely on the content the AI was explicitly instructed to generate.
+- The API key was removed from the client-side bundle and moved to a secure backend route to meet production security standards.
 
 ## Setup & Installation
 
@@ -71,8 +73,7 @@ The user interface was intentionally designed as a clean, responsive, and profes
 3. Configure Environment Variables:
    Create a `.env` file in the root directory and add your API credentials. Do NOT commit this file.
    ```env
-   VITE_AI_API_KEY=your_gemini_api_key_here
-   VITE_AI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 4. Run the development server:
